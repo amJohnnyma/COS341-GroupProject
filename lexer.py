@@ -41,3 +41,18 @@ class Lexer:
     
     def check_keyword_symbol(self, token):
         pass
+
+    def look_ahead(self):
+        temp_pos = self.pos
+        while (temp_pos < len(self.source) and self.source[temp_pos] in [" ", "\n"]):
+            temp_pos += 1
+        if temp_pos >= len(self.source):
+            return None
+        startPos = temp_pos
+
+        while (temp_pos < len(self.source) and self.source[temp_pos] not in [" ", "\n"]):
+            temp_pos += 1
+            
+        token = self.source[startPos:temp_pos]
+        return self.classify(token)
+
