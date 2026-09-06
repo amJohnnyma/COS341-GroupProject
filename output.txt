@@ -1,0 +1,99 @@
+└── SPL_PROG
+    ├── P
+    │   ├── V_DECL
+    │   │   ├── USER-DEFINED-NAME (#x)
+    │   │   └── V_DECL
+    │   │       ├── USER-DEFINED-NAME (#y)
+    │   │       └── V_DECL
+    │   │           └── ε
+    │   ├── COLON (:)
+    │   ├── F_DECL
+    │   │   ├── F_TYPE
+    │   │   │   ├── num (num)
+    │   │   │   ├── USER-DEFINED-NAME (#add_one)
+    │   │   │   ├── LPAREN (()
+    │   │   │   ├── V_DECL
+    │   │   │   │   ├── USER-DEFINED-NAME (#a)
+    │   │   │   │   └── V_DECL
+    │   │   │   │       └── ε
+    │   │   │   ├── RPAREN ())
+    │   │   │   ├── LBRACE ({)
+    │   │   │   ├── P
+    │   │   │   │   ├── V_DECL
+    │   │   │   │   │   └── ε
+    │   │   │   │   ├── COLON (:)
+    │   │   │   │   ├── F_DECL
+    │   │   │   │   │   └── ε
+    │   │   │   │   ├── COLON (:)
+    │   │   │   │   └── ALGO
+    │   │   │   │       ├── INSTR
+    │   │   │   │       │   ├── USER-DEFINED-NAME (#a)
+    │   │   │   │       │   └── INSTRTAIL
+    │   │   │   │       │       ├── ASSIGN (=)
+    │   │   │   │       │       └── TERM
+    │   │   │   │       │           ├── add (add)
+    │   │   │   │       │           ├── LPAREN (()
+    │   │   │   │       │           ├── TERM
+    │   │   │   │       │           │   ├── USER-DEFINED-NAME (#a)
+    │   │   │   │       │           │   └── TERMTAIL
+    │   │   │   │       │           │       └── EPSILON
+    │   │   │   │       │           ├── TERM
+    │   │   │   │       │           │   └── NUM (1)
+    │   │   │   │       │           └── RPAREN ())
+    │   │   │   │       ├── SEMICOLON (;)
+    │   │   │   │       └── ALGO
+    │   │   │   │           └── EPSILON
+    │   │   │   ├── return (return)
+    │   │   │   ├── LPAREN (()
+    │   │   │   ├── TERM
+    │   │   │   │   ├── USER-DEFINED-NAME (#a)
+    │   │   │   │   └── TERMTAIL
+    │   │   │   │       └── EPSILON
+    │   │   │   ├── RPAREN ())
+    │   │   │   └── RBRACE (})
+    │   │   └── F_DECL
+    │   │       └── ε
+    │   ├── COLON (:)
+    │   └── ALGO
+    │       ├── INSTR
+    │       │   ├── USER-DEFINED-NAME (#x)
+    │       │   └── INSTRTAIL
+    │       │       ├── ASSIGN (=)
+    │       │       └── TERM
+    │       │           └── NUM (10)
+    │       ├── SEMICOLON (;)
+    │       └── ALGO
+    │           ├── INSTR
+    │           │   └── LOOP
+    │           │       ├── COND
+    │           │       │   └── while (while)
+    │           │       ├── BOOL
+    │           │       │   ├── larger (larger)
+    │           │       │   ├── LPAREN (()
+    │           │       │   ├── TERM
+    │           │       │   │   ├── USER-DEFINED-NAME (#x)
+    │           │       │   │   └── TERMTAIL
+    │           │       │   │       └── EPSILON
+    │           │       │   ├── TERM
+    │           │       │   │   └── NUM (0)
+    │           │       │   └── RPAREN ())
+    │           │       ├── do (do)
+    │           │       ├── LBRACE ({)
+    │           │       ├── ALGO
+    │           │       │   ├── INSTR
+    │           │       │   │   ├── print (print)
+    │           │       │   │   └── OUTP
+    │           │       │   │       ├── LPAREN (()
+    │           │       │   │       ├── TERM
+    │           │       │   │       │   ├── USER-DEFINED-NAME (#x)
+    │           │       │   │       │   └── TERMTAIL
+    │           │       │   │       │       └── EPSILON
+    │           │       │   │       └── RPAREN ())
+    │           │       │   ├── SEMICOLON (;)
+    │           │       │   └── ALGO
+    │           │       │       └── EPSILON
+    │           │       └── RBRACE (})
+    │           ├── SEMICOLON (;)
+    │           └── ALGO
+    │               └── EPSILON
+    └── EOF ($)

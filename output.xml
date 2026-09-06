@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SPL_PROG>
+    <P>
+        <V_DECL>
+            <USER-DEFINED-NAME>#x</USER-DEFINED-NAME>
+            <V_DECL>
+                <USER-DEFINED-NAME>#y</USER-DEFINED-NAME>
+                <V_DECL>
+                    <ε />
+                </V_DECL>
+            </V_DECL>
+        </V_DECL>
+        <COLON>:</COLON>
+        <F_DECL>
+            <F_TYPE>
+                <num>num</num>
+                <USER-DEFINED-NAME>#add_one</USER-DEFINED-NAME>
+                <LPAREN>(</LPAREN>
+                <V_DECL>
+                    <USER-DEFINED-NAME>#a</USER-DEFINED-NAME>
+                    <V_DECL>
+                        <ε />
+                    </V_DECL>
+                </V_DECL>
+                <RPAREN>)</RPAREN>
+                <LBRACE>{</LBRACE>
+                <P>
+                    <V_DECL>
+                        <ε />
+                    </V_DECL>
+                    <COLON>:</COLON>
+                    <F_DECL>
+                        <ε />
+                    </F_DECL>
+                    <COLON>:</COLON>
+                    <ALGO>
+                        <INSTR>
+                            <USER-DEFINED-NAME>#a</USER-DEFINED-NAME>
+                            <INSTRTAIL>
+                                <ASSIGN>=</ASSIGN>
+                                <TERM>
+                                    <add>add</add>
+                                    <LPAREN>(</LPAREN>
+                                    <TERM>
+                                        <USER-DEFINED-NAME>#a</USER-DEFINED-NAME>
+                                        <TERMTAIL>
+                                            <EPSILON />
+                                        </TERMTAIL>
+                                    </TERM>
+                                    <TERM>
+                                        <NUM>1</NUM>
+                                    </TERM>
+                                    <RPAREN>)</RPAREN>
+                                </TERM>
+                            </INSTRTAIL>
+                        </INSTR>
+                        <SEMICOLON>;</SEMICOLON>
+                        <ALGO>
+                            <EPSILON />
+                        </ALGO>
+                    </ALGO>
+                </P>
+                <return>return</return>
+                <LPAREN>(</LPAREN>
+                <TERM>
+                    <USER-DEFINED-NAME>#a</USER-DEFINED-NAME>
+                    <TERMTAIL>
+                        <EPSILON />
+                    </TERMTAIL>
+                </TERM>
+                <RPAREN>)</RPAREN>
+                <RBRACE>}</RBRACE>
+            </F_TYPE>
+            <F_DECL>
+                <ε />
+            </F_DECL>
+        </F_DECL>
+        <COLON>:</COLON>
+        <ALGO>
+            <INSTR>
+                <USER-DEFINED-NAME>#x</USER-DEFINED-NAME>
+                <INSTRTAIL>
+                    <ASSIGN>=</ASSIGN>
+                    <TERM>
+                        <NUM>10</NUM>
+                    </TERM>
+                </INSTRTAIL>
+            </INSTR>
+            <SEMICOLON>;</SEMICOLON>
+            <ALGO>
+                <INSTR>
+                    <LOOP>
+                        <COND>
+                            <while>while</while>
+                        </COND>
+                        <BOOL>
+                            <larger>larger</larger>
+                            <LPAREN>(</LPAREN>
+                            <TERM>
+                                <USER-DEFINED-NAME>#x</USER-DEFINED-NAME>
+                                <TERMTAIL>
+                                    <EPSILON />
+                                </TERMTAIL>
+                            </TERM>
+                            <TERM>
+                                <NUM>0</NUM>
+                            </TERM>
+                            <RPAREN>)</RPAREN>
+                        </BOOL>
+                        <do>do</do>
+                        <LBRACE>{</LBRACE>
+                        <ALGO>
+                            <INSTR>
+                                <print>print</print>
+                                <OUTP>
+                                    <LPAREN>(</LPAREN>
+                                    <TERM>
+                                        <USER-DEFINED-NAME>#x</USER-DEFINED-NAME>
+                                        <TERMTAIL>
+                                            <EPSILON />
+                                        </TERMTAIL>
+                                    </TERM>
+                                    <RPAREN>)</RPAREN>
+                                </OUTP>
+                            </INSTR>
+                            <SEMICOLON>;</SEMICOLON>
+                            <ALGO>
+                                <EPSILON />
+                            </ALGO>
+                        </ALGO>
+                        <RBRACE>}</RBRACE>
+                    </LOOP>
+                </INSTR>
+                <SEMICOLON>;</SEMICOLON>
+                <ALGO>
+                    <EPSILON />
+                </ALGO>
+            </ALGO>
+        </ALGO>
+    </P>
+    <EOF>$</EOF>
+</SPL_PROG>
