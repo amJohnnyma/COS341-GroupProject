@@ -49,7 +49,7 @@ class Lexer:
         pass
     
     def check_keyword_symbol(self, token):
-        return "testing"
+        pass
 
     def look_ahead(self):
         temp_pos = self.pos
