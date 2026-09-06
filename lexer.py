@@ -1,67 +1,156 @@
-import ntstruct
+import re
+from tokens import Token, TOKEN_KEYWORDS, PUNC
+
+
+
+NUM_RE = re.compile(
+
+    r"^(0|(-?0\.[0-9]*[1-9])|(-?[1-9][0-9]*\.[0-9]*[1-9])|(-?[1-9][0-9]*))$"
+
+)
+
+
+
+
+
+class LexError(Exception):
+   
+    pass
+
+
 
 class Lexer:
-    
+
+
     def __init__(self, source: str):
+      
         self.source = source
+       
         self.pos = 0
-    
-    def get_next_token(self):
-        while (self.pos < len(self.source) and self.source[self.pos] in [" ", "\n", "\r"]):
-            self.pos += 1
-        if self.pos >= len(self.source):
-            return None
-        startPos = self.pos
 
-        while (self.pos < len(self.source) and self.source[self.pos] not in [" ", "\n", "\r"]):
-            self.pos += 1
+
+    def _next_chunk(self, start_pos: int):
+
+        pos = start_pos
+
+        while pos < len(self.source) and self.source[pos] in (" ", "\n", "\r", "\t"):
+           
+            pos += 1
+
+        if pos >= len(self.source):
             
-        token = self.source[startPos:self.pos]
-        return self.classify(token)
+            return None, pos
 
-    def classify(self, token):
+        chunk_start = pos
+
+        while pos < len(self.source) and self.source[pos] not in (" ", "\n", "\r", "\t"):
+         
+            pos += 1
+
+
+        return self.source[chunk_start:pos], pos
+
+
+    def get_next_token(self) -> Token:
+      
+        chunk, new_pos = self._next_chunk(self.pos)
+       
+        self.pos = new_pos
+
+        if chunk is None:
+          
+            return Token("$", "$")
+
+        return self.classify(chunk)
+
+
+    def look_ahead(self) -> Token:
+      
+        chunk, _ = self._next_chunk(self.pos)
+
+        if chunk is None:
+           
+            return Token("$", "$")
+       
+        return self.classify(chunk)
+
+
+    def classify(self, token: str) -> Token:
+
         if token.startswith("#"):
-            return self.check_UDN(token)
-        elif token.startswith('"'):
-            return self.check_string(token)
-        elif token[0].isdigit() or token[0] == "-":
-            return self.check_num(token)
-        
-        else:
-            return self.check_keyword_symbol(token)
-    
-    def check_UDN(self, token):
-        for char in token[1:]:
-            if not (('a' <= char <= 'z') or ('0' <= char <= '9')):
-                raise ValueError(f"UDN: {token} is invalid")
-        return (token)
-    
-    def check_string(self, token):
-        if not token.endswith('"'):
-            raise ValueError(f"String: {token} is invalid")
-        for char in token[1:-1]:
-            if not (('a' <= char <= 'z') or ('0' <= char <= '9') or (char == ',') or (char == '.') or (char == ':') or (char == '-') or (char == '?') or (char == '!')):
-                raise ValueError(f"String: {token} is invalid")
-
-        return (token)
-    
-    def check_num(self, token):
-        pass
-    
-    def check_keyword_symbol(self, token):
-        pass
-
-    def look_ahead(self):
-        temp_pos = self.pos
-        while (temp_pos < len(self.source) and self.source[temp_pos] in [" ", "\n", "\r"]):
-            temp_pos += 1
-        if temp_pos >= len(self.source):
-            return None
-        startPos = temp_pos
-
-        while (temp_pos < len(self.source) and self.source[temp_pos] not in [" ", "\n", "\r"]):
-            temp_pos += 1
             
-        token = self.source[startPos:temp_pos]
-        return self.classify(token)
+            return self.check_UDN(token)
 
+        elif token.startswith('"'):
+           
+            return self.check_string(token)
+
+        elif token[0].isdigit() or (token[0] == "-" and len(token) > 1):
+           
+            return self.check_num(token)
+
+        else:
+           
+            return self.check_keyword_symbol(token)
+
+
+    def check_UDN(self, token: str) -> Token:
+
+        for char in token[1:]:
+
+            if not (("a" <= char <= "z") or ("0" <= char <= "9")):
+
+                raise LexError(f"Invalid USER-DEFINED-NAME: '{token}'")
+
+        return Token("USER-DEFINED-NAME", token)
+
+
+
+    def check_string(self, token: str) -> Token:
+
+        if not token.endswith('"') or len(token) < 2:
+           
+            raise LexError(f"Invalid STRING: '{token}'")
+
+        for char in token[1:-1]:
+          
+            if not (
+                ("a" <= char <= "z")
+                or ("0" <= char <= "9")
+                or char in (",", ".", ":", "-", "?", "!")
+           
+            ):
+           
+                raise LexError(f"Invalid STRING: '{token}'")
+
+       
+        return Token("STRING", token)
+
+
+    def check_num(self, token: str) -> Token:
+
+
+        if not NUM_RE.match(token):
+         
+            raise LexError(f"Invalid NUM: '{token}'")
+       
+        
+        return Token("NUM", token)
+
+
+    def check_keyword_symbol(self, token: str) -> Token:
+      
+        if token == "$":
+       
+            return Token("$", "$")
+        
+        if token in TOKEN_KEYWORDS:
+       
+            return Token(token, token)
+        
+        if token in PUNC:
+       
+            return Token(token, token)
+        
+       
+        raise LexError(f"Unrecognized token: '{token}'")
