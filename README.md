@@ -65,6 +65,7 @@ python3 graph_gen.py
 : : #x = 5 ; $
 
 ```
+![Assignment Syntax Tree](test1.png)
 
 **Arithmetic Addition**
 
@@ -72,6 +73,7 @@ python3 graph_gen.py
 : : #x = add ( 3 4 ) ; $
 
 ```
+![Arithmetic Addition Syntax Tree](test2.png)
 
 **Negation**
 
@@ -79,6 +81,7 @@ python3 graph_gen.py
 : : #x = neg ( 9 ) ; $
 
 ```
+![Negation Syntax Tree](test3.png)
 
 **Function Call Instruction**
 
@@ -86,6 +89,7 @@ python3 graph_gen.py
 : : #log ( 1 ) ; $
 
 ```
+![Function Call Syntax Tree](test4.png)
 
 **Branching (`if-then-else`)**
 
@@ -93,6 +97,7 @@ python3 graph_gen.py
 : : if eq ( #x 0 ) then { print ( #x ) ; } else { nop ; } ; $
 
 ```
+![Branching Syntax Tree](test5.png)
 
 **`while` Loop**
 
@@ -100,6 +105,7 @@ python3 graph_gen.py
 : : while larger ( #x 0 ) do { #x = sub ( #x 1 ) ; } ; $
 
 ```
+![While Loop Syntax Tree](test6.png)
 
 **`do-until` Loop**
 
@@ -107,6 +113,7 @@ python3 graph_gen.py
 : : do { nop ; } until eq ( #x 0 ) ; $
 
 ```
+![Do-Until Loop Syntax Tree](test7.png)
 
 ---
 
@@ -132,6 +139,7 @@ print ( #result ) ;
 $
 
 ```
+![Factorial Syntax Tree](advanced1.png)
 
 #### 2. Control Flow, Strings & Void Functions
 
@@ -164,6 +172,7 @@ while lesser ( #i #max ) do {
 $
 
 ```
+![Control Flow Syntax Tree](advanced2.png)
 
 #### 3. Nested Scopes & Prefix Expression Trees
 
@@ -185,3 +194,4 @@ print ( add ( sub ( mul ( div ( neg ( 100 ) 2 ) 3 ) 4 ) mod ( 10 3 ) ) ) ;
 $
 
 ```
+![Nested Scopes Syntax Tree](advanced3.png)
