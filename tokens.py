@@ -50,14 +50,14 @@ TOKEN_TAG_MAP = {
 class Token:
 
 
-    def init(self, token_type: str, value: str = ""):
+    def __init__(self, token_type: str, value: str = ""):
 
         self.type = token_type
 
         self.value = value if value is not None else token_type
 
 
-    def eq(self, other):
+    def __eq__(self, other):
 
         if isinstance(other, str):
 
@@ -66,6 +66,6 @@ class Token:
         return NotImplemented
 
 
-    def repr(self):
+    def __repr__(self):
 
         return f"Token({self.type!r}, {self.value!r})"
