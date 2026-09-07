@@ -129,8 +129,12 @@ class Parser:
         self._buffered_token = None
 
         if token.type == expected_token_type:
+            if token.type in ("NUM", "USER-DEFINED-NAME", "STRING"):
+                parent_node = Node(contents=token.type)
+                val_node = Node(contents=token.value, is_terminal=True)
+                parent_node.add_child(val_node)
+                return parent_node
        
-            tag_name = tag_for(token.type)
        
             return Node(contents=token.value, is_terminal=True)
        
