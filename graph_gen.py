@@ -15,7 +15,7 @@ def xml_to_graph(xml_file: str, output_filename: str = "syntax_tree"):
         contents = node.find("CONTENTS").text
 
         # Style terminals vs non-terminals visually
-        if contents in ("epsilon", "$", ":", ";", "=") or contents.startswith("#") or contents.isdigit():
+        if contents in ("epsilon", "$", ":", "void", "(", ")", "{", "}", "return", "num", ";", "print", "nop", "comment", "mod", "add", "sub", "mul", "div", "neg", "if", "then", "else", "not", "and", "or", "eq", "larger", "lesser", "do", "while", "until") or contents.startswith("#") or contents.isdigit():
             dot.node(node_id, label=contents, shape="box", style="filled", fillcolor="lightgray")
         else:
             dot.node(node_id, label=contents)
