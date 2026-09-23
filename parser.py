@@ -129,9 +129,6 @@ class Parser:
         self._buffered_token = None
 
         if token.type == expected_token_type:
-       
-            tag_name = tag_for(token.type)
-       
             return Node(contents=token.value, is_terminal=True)
        
         else:

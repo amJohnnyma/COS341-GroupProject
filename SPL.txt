@@ -1,1 +1,13 @@
-: : #x = 5 ; $
+#val :
+num #outer ( ) {
+  :
+  num #inner ( #a #b ) {
+    : :
+    return ( add ( #a #b ) )
+  } :
+  #val = #inner ( neg ( 10 ) 20 ) ;
+  return ( #val )
+} :
+#val = #outer ( ) ;
+print ( add ( sub ( mul ( div ( neg ( 100 ) 2 ) 3 ) 4 ) mod ( 10 3 ) ) ) ;
+$

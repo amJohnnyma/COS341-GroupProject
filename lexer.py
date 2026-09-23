@@ -43,6 +43,18 @@ class Lexer:
 
         chunk_start = pos
 
+        if self.source[pos] == '"':
+            pos += 1
+            while pos < len(self.source):
+                if self.source[pos] == '"':
+                    pos+=1
+                    break
+                if self.source[pos] in ("/n", "/r"):
+                    break
+                pos += 1
+
+            return self.source[chunk_start:pos], pos
+
         while pos < len(self.source) and self.source[pos] not in (" ", "\n", "\r", "\t"):
          
             pos += 1
@@ -117,7 +129,7 @@ class Lexer:
             if not (
                 ("a" <= char <= "z")
                 or ("0" <= char <= "9")
-                or char in (",", ".", ":", "-", "?", "!")
+                or char in (" ", ",", ".", ":", "-", "?", "!")
            
             ):
            
