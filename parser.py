@@ -2,6 +2,7 @@
 import xml.etree.ElementTree as ET
 from lexer import Lexer
 from tokens import Token, TOKEN_TAG_MAP
+from tree_crawl import TreeCrawl
 
 
 
@@ -520,6 +521,8 @@ if __name__ == "__main__":
         root = parser.parse()
         write_tree_xml(root, "tree.xml")
         print("Parse successful. Wrote tree.xml")
+        crawler = TreeCrawl("tree.xml")
+        crawler.print_tree()
     
     except ParseError as e:
       
