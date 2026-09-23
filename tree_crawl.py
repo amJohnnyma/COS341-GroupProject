@@ -64,7 +64,7 @@ class TreeCrawl:
         is_nested_p = (
                 node.contents == "P"
                 and parent_node is not None
-                and parent_node.contents == "F_TYPE"
+                and parent_node.contents == "F_TYPE" #Scope only changes here
                 )
 
         child_scope = current_scope + 1 if is_nested_p else current_scope
@@ -88,6 +88,8 @@ class TreeCrawl:
             self.crawl_tree(node_id=child_id, parent_node=node, current_scope=child_scope)
         '''
 
+
+# From Gemini
     def print_tree(self, node_id: int = 0, prefix: str = "", is_last: bool = True):
             """Prints an ASCII hierarchy tree showing contents, ID, Parent ID, and Scope Level."""
             node = self.getNode(node_id)
