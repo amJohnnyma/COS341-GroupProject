@@ -523,6 +523,7 @@ if __name__ == "__main__":
         print("Parse successful. Wrote tree.xml")
         crawler = TreeCrawl("tree.xml")
         crawler.print_tree()
+        crawler.print_all_scopes()
     
     except ParseError as e:
       

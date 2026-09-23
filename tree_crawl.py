@@ -28,6 +28,7 @@ class TreeCrawl:
         self.nodes = {}
         self._load_xml(filename)
         self._next_scope_id = 0
+        self.all_scopes:list[ScopeLevel] = []
 
         root_scope = ScopeLevel(scope_id=self._get_next_scope_id(), level=0,parent=None)
         self.crawl_tree(node_id =0, parent_node=None,current_scope=root_scope)
@@ -39,6 +40,17 @@ class TreeCrawl:
         sid = self._next_scope_id
         self._next_scope_id += 1
         return sid
+
+    def _add_scope(self, scope_level):
+        if not any(s.scope_id == scope_level.scope_id for s in self.all_scopes):
+            self.all_scopes.append(scope_level)
+
+    def print_all_scopes(self):
+        for s in self.all_scopes:
+            print(f"ID={s.scope_id}, Level={s.level}")
+
+    def get_all_scopes(self):
+        return self.all_scopes
 
     def _load_xml(self, filename):
         self.tree = ET.parse(filename)
@@ -93,6 +105,8 @@ class TreeCrawl:
                 parent=current_scope)
         else:
             child_scope = current_scope
+
+        self._add_scope(child_scope)
 
         node.scope_level = child_scope
 
