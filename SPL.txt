@@ -11,6 +11,19 @@ num #outer ( ) {
   } :
   #val = #inner ( neg ( 10 ) 20 ) ;
   return ( #val )
+}
+num #outer1 ( ) {
+  :
+  num #inner1 ( #a #b ) {
+    :
+    num #innermost1 ( #x ) {
+      : :
+      return ( add ( #x 1 ) )
+    } :
+    return ( add ( #innermost1 ( #a ) #b ) )
+  } :
+  #val1 = #inner1 ( neg ( 10 ) 20 ) ;
+  return ( #val )
 } :
 #val = #outer ( ) ;
 $
