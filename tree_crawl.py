@@ -80,9 +80,10 @@ class TreeCrawl:
     def crawl_tree(self, node_id, parent_node:Optional[SLNode]=None, current_scope = None):
 
         # 1. Read through node by node:
-        # 2. If the node is "P"
-        # -> Inherit previous scope level
-        # --> Process children on scope level + 1
+        # 2. If the node is "F_TYPE"
+        # -> its own num/void keyword + NAME stay in the ENCLOSING scope
+        # -> its params (V_DECL), body (P), and return-value (TERM) all get
+        #    ONE new shared scope (the function's own scope)
         # 3. Continue from 1
         if current_scope is None:
             current_scope = ScopeLevel()
@@ -91,42 +92,30 @@ class TreeCrawl:
             return
 
         node.parent = parent_node
+        node.scope_level = current_scope
+        self._add_scope(current_scope)
 
-        is_nested_p = (
-                node.contents == "P"
-                and parent_node is not None
-                and parent_node.contents == "F_TYPE" #Scope only changes here
-                )
-
-        if is_nested_p:
-            child_scope = ScopeLevel(
-                scope_id = self._get_next_scope_id(),
+        if node.contents == "F_TYPE":
+            # One new scope shared by this function's params, body, and
+            # return-value expression -- NOT by the F_TYPE node itself,
+            # so the function's own name stays visible at the enclosing
+            # scope (needed for sibling/caller lookups).
+            func_scope = ScopeLevel(
+                scope_id=self._get_next_scope_id(),
                 level=current_scope.level + 1,
                 parent=current_scope)
-        else:
-            child_scope = current_scope
+            self._add_scope(func_scope)
 
-        self._add_scope(child_scope)
-
-        node.scope_level = child_scope
-
-        for child_id in node.children_ids:
-            self.crawl_tree(child_id, parent_node=node, current_scope=child_scope)
-
-        '''
-        OPTION INCASE SCOPE INCREASES ON RETURN, expressions, etc.)
-        node.parent = parent_node
-        node.scope_level = current_scope
+            for child_id in node.children_ids:
+                child = self.getNode(child_id)
+                if child and child.contents in ("V_DECL", "P", "TERM"):
+                    self.crawl_tree(child_id, parent_node=node, current_scope=func_scope)
+                else:
+                    self.crawl_tree(child_id, parent_node=node, current_scope=current_scope)
+            return
 
         for child_id in node.children_ids:
-            # If current node is F_TYPE, its children (P, return, expressions) live in the function's new scope
-            if node.contents == "F_TYPE":
-                child_scope = current_scope + 1
-            else:
-                child_scope = current_scope
-
-            self.crawl_tree(node_id=child_id, parent_node=node, current_scope=child_scope)
-        '''
+            self.crawl_tree(child_id, parent_node=node, current_scope=current_scope)
 
 
 # From Gemini
@@ -152,5 +141,3 @@ class TreeCrawl:
             count = len(node.children_ids)
             for i, child_id in enumerate(node.children_ids):
                 self.print_tree(child_id, prefix=new_prefix, is_last=(i == count - 1))
-
-
