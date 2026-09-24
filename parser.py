@@ -3,6 +3,7 @@ import xml.etree.ElementTree as ET
 from lexer import Lexer
 from tokens import Token, TOKEN_TAG_MAP
 from tree_crawl import TreeCrawl
+from symbol_table import SymbolTable
 
 
 
@@ -524,6 +525,8 @@ if __name__ == "__main__":
         crawler = TreeCrawl("tree.xml")
         crawler.print_tree()
         crawler.print_all_scopes()
+        symbol_table = SymbolTable(crawler)
+        symbol_table.print_table()
     
     except ParseError as e:
       
