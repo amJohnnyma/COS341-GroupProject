@@ -1,9 +1,0 @@
-#x #y :
-num #addone ( #a ) {
-: :
-#a = add ( #a 1 ) ;
-return ( #a ) }
-:
-#x = 10 ;
-while larger ( #x 0 ) do { print ( #x ) ; } ;
-$
