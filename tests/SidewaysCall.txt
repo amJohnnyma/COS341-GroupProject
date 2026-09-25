@@ -1,0 +1,14 @@
+:
+num #f ( ) {
+:
+num #h ( ) {
+: :
+return ( 1 )
+} :
+return ( #g ( ) )
+}
+num #g ( ) {
+: :
+return ( #h ( ) )
+} :
+$
