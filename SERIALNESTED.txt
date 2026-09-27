@@ -1,4 +1,4 @@
-#val :
+#val #val1 :
 num #outer ( ) {
   :
   num #inner ( #a #b ) {
