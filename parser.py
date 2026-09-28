@@ -4,6 +4,7 @@ from lexer import Lexer
 from tokens import Token, TOKEN_TAG_MAP
 from tree_crawl import TreeCrawl
 from symbol_table import SymbolTable
+from semantic_check import run_all_checks
 
 
 
@@ -526,6 +527,13 @@ if __name__ == "__main__":
         crawler.print_tree()
         crawler.print_all_scopes()
         symbol_table = SymbolTable(crawler)
+
+        errors = run_all_checks(crawler, symbol_table)
+        if errors: 
+            for error in errors:
+                print(error)
+            sys.exit(1)
+
         symbol_table.print_table()
     
     except ParseError as e:
