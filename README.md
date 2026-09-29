@@ -39,24 +39,22 @@ pyinstaller --onefile --name group-8 main.py
 
 ## Usage
 
+### Executable Usage
+---
 Run the executable (program file must be next to executable)
 ```bash
 ./group-8 <filename>
 ```
+---
 
-Run the parser and semantic analyzer on an SPL source file (must be next to main.py):
+### Developer Usage
+---
+Run the parser and semantic analyzer manually (must be next to main.py):
 
 ```bash
 python3 main.py <filename>
 ```
 
-On success, this writes `tree.xml` (the syntax tree in the required ID, CONTENTS, CHILDREN, PARENT format).
-
-On failure, it prints one of:
-
-* `SYNTAX ERROR: ...` if the input does not match the SPL grammar
-* `LEXICAL ERROR: ...` if the input contains an invalid token
-* One or more `SEMANTIC ERROR: ...` lines if the input is syntactically valid but violates a naming, scope, or function rule
 
 Generate a visual graph of the tree (optional, requires Graphviz):
 
@@ -65,6 +63,16 @@ python3 graph_gen.py
 ```
 
 This converts `tree.xml` into `syntax_tree.png`.
+
+---
+
+On success, this writes `tree.xml` (the syntax tree in the required ID, CONTENTS, CHILDREN, PARENT format).
+
+On failure, it prints one of:
+
+* `SYNTAX ERROR: ...` if the input does not match the SPL grammar
+* `LEXICAL ERROR: ...` if the input contains an invalid token
+* One or more `SEMANTIC ERROR: ...` lines if the input is syntactically valid but violates a naming, scope, or function rule
 
 ## Important note about the end of input
 
