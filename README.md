@@ -1,141 +1,170 @@
-# COS341 Group Project — SPL Parser & Visualizer
+# COS341 Group Project (Group) - SPL Compiler Front-End
 
-A lexical analyzer, LL(1) top-down parser, and syntax tree visualizer for the Simple Programming Language (SPL).
+A lexical analyzer, LL(1) top-down parser, syntax tree visualizer, and semantic analyzer for the Simple Programming Language (SPL), built for COS341.
 
----
+## Members
+| Member Name | Student Number | Role |
+| :--- | :--- | :--- |
+| **Christopher Adolph** | 23535548 | Speaker |
+| **Dewald Colesky** | 23536030 | Developer |
+| **Heinrich Romer** | 23538181 | Developer |
+| **Jonty Honey** | 23536862 | Developer |
 
-## Setup & Prerequisites
 
-### 1. Environment Setup
+## What this project does
 
-Create and activate a virtual environment:
+- Phase 1: Lexing, parsing, and syntax tree generation (writes `tree.xml`)
+- Phase 2a: Semantic analysis, including scope resolution, symbol table construction, and name/function rule checking
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
+## Requirements
 
-```
+Python 3.10 or newer.
 
-### 2. Install Dependencies
+For the optional graph visualizer only, you also need Graphviz.
 
-Install the Python wrapper for Graphviz:
+To create an executable PyInstaller is required
 
-```bash
-pip install graphviz
+### Build the executable
 
-```
+Install PyInstaller:
 
-> **System Dependency:** Graphviz must also be installed on your operating system.
-> * **Linux (Ubuntu/Debian):** `sudo apt install graphviz`
-> * **macOS:** `brew install graphviz`
-> 
-> 
-
----
-
-## Usage
-
-### 1. Run the Parser
-
-Parse an SPL source file to generate the AST (`tree.xml`):
-
-```bash
-python3 parser.py <filename>
-
-```
-
-### 2. Generate Syntax Tree Graph
-
-Convert `tree.xml` into a rendered syntax tree image (`syntax_tree.png`):
-
-```bash
-python3 graph_gen.py
-
-```
-
----
-
-## Build
-
-### 1. Install pyinstaller
 ```bash
 pip install pyinstaller
 ```
 
-### 2. Create executable
+Build a single-file executable from `parser.py`. (PyInstaller does not cross compile, a build made on Linux only runs on Linux, a build made on Windows only runs on Windows):
+
 ```bash
 pyinstaller --onefile --name group-8 main.py
 ```
 
-## Test Cases
+## Usage
 
-### Basic Statements
-
-**Assignment**
-
-```text
-: : #x = 5 ; $
-
+### Executable Usage
+---
+Run the executable (program file must be next to executable)
+```bash
+./group-8 <filename>
 ```
-![Assignment Syntax Tree](test1.png)
+---
 
-**Arithmetic Addition**
+### Developer Usage
+---
+Run the parser and semantic analyzer manually (must be next to main.py):
 
-```text
-: : #x = add ( 3 4 ) ; $
-
+```bash
+python3 main.py <filename>
 ```
-![Arithmetic Addition Syntax Tree](test2.png)
 
-**Negation**
 
-```text
-: : #x = neg ( 9 ) ; $
+Generate a visual graph of the tree (optional, requires Graphviz):
 
+```bash
+python3 graph_gen.py
 ```
-![Negation Syntax Tree](test3.png)
 
-**Function Call Instruction**
-
-```text
-: : #log ( 1 ) ; $
-
-```
-![Function Call Syntax Tree](test4.png)
-
-**Branching (`if-then-else`)**
-
-```text
-: : if eq ( #x 0 ) then { print ( #x ) ; } else { nop ; } ; $
-
-```
-![Branching Syntax Tree](test5.png)
-
-**`while` Loop**
-
-```text
-: : while larger ( #x 0 ) do { #x = sub ( #x 1 ) ; } ; $
-
-```
-![While Loop Syntax Tree](test6.png)
-
-**`do-until` Loop**
-
-```text
-: : do { nop ; } until eq ( #x 0 ) ; $
-
-```
-![Do-Until Loop Syntax Tree](test7.png)
+This converts `tree.xml` into `syntax_tree.png`.
 
 ---
 
-### Advanced Benchmarks
+On success, this writes `tree.xml` (the syntax tree in the required ID, CONTENTS, CHILDREN, PARENT format).
 
-#### 1. Recursion & Arithmetic (`Factorial`)
+On failure, it prints one of:
 
-Tests `num` function declarations, local variable declarations, recursive calls, and nested arithmetic expressions.
+* `SYNTAX ERROR: ...` if the input does not match the SPL grammar
+* `LEXICAL ERROR: ...` if the input contains an invalid token
+* One or more `SEMANTIC ERROR: ...` lines if the input is syntactically valid but violates a naming, scope, or function rule
 
-```text
+## Important note about the end of input
+
+The pseudo symbol `$` is NOT literally included at the end of a real test file. `$` is only used to talk about the grammar and the parser, it is not an actual member symbol of the SPL language itself. Our lexer automatically produces an end of file `$` token once it reaches the end of the input, whether or not the file itself contains a literal `$` character.
+
+## Project structure
+
+| File | Owner | Purpose |
+|---|---|---|
+| `tokens.py` | shared | Shared `Token` class, keyword and symbol tables |
+| `lexer.py` | shared | Tokenizes SPL source into a stream of `Token`s |
+| `parser.py` | shared | Recursive descent LL(1) parser, builds the syntax tree and writes `tree.xml` |
+| `graph_gen.py` | shared | Renders `tree.xml` as a `syntax_tree.png` image using Graphviz |
+| `tree_crawl.py` | Colesky | Walks the syntax tree, assigns scope levels, builds the scope hierarchy |
+| `symbol_table.py` | Jonty | Builds the symbol table from the scope tree, assigns unique internal (`sys###`) names |
+| `variable_rules.py` | Heinrich | Checks variable declaration and usage rules: ancestor lookup, no duplicates, no parameter masking |
+| `function_rules.py` | Christopher | Checks function rules: name uniqueness, strictly hierarchic call resolution, recursion detection |
+| `semantic_check.py` | shared | Combines all semantic rule checks into one entry point |
+
+## Grammar
+
+```
+SPL_PROG -> P $
+P        -> V_DECL : F_DECL : ALGO
+V_DECL   -> epsilon | USER-DEFINED-NAME V_DECL
+F_DECL   -> epsilon | F_TYPE F_DECL
+F_TYPE   -> void NAME ( V_DECL ) { P return }
+          | num  NAME ( V_DECL ) { P return ( TERM ) }
+ALGO     -> epsilon | INSTR ; ALGO
+INSTR    -> USER-DEFINED-NAME INSTRTAIL | print OUTP | nop
+          | comment STRING | BRANCH | LOOP
+INSTRTAIL -> ( INPUT ) | = TERM
+TERM     -> USER-DEFINED-NAME TERMTAIL | NUM
+          | mod/add/sub/mul/div ( TERM TERM ) | neg ( TERM )
+BRANCH   -> if BOOL then { ALGO } else { ALGO }
+BOOL     -> not(BOOL) | and/or(BOOL BOOL) | eq/larger/lesser(TERM TERM)
+LOOP     -> COND BOOL do { ALGO } | do { ALGO } COND BOOL
+COND     -> while | until
+```
+
+Left factored for LL(1) parsing. `INSTRTAIL` and `TERMTAIL` resolve the shared `USER-DEFINED-NAME` prefix with one token of lookahead.
+
+## Semantic rules implemented
+
+Variables: a declared name must exist in the usage's own scope or an ancestor scope, with the nearest declaration winning. No two declarations of the same kind are allowed at one scope level. A function's local variables may not mask its own parameters.
+
+Functions: no duplicate function names are allowed at a scope level. Function calls are strictly hierarchic, meaning a call must resolve within the caller's own immediate scope, never an ancestor's. This one rule structurally blocks both direct and indirect recursion, along with sideways calls between sibling functions' private helpers.
+
+## Test cases
+
+### Basic statements
+
+Assignment:
+```
+: : #x = 5 ; $
+```
+
+Arithmetic addition:
+```
+: : #x = add ( 3 4 ) ; $
+```
+
+Negation:
+```
+: : #x = neg ( 9 ) ; $
+```
+
+Function call instruction:
+```
+: : #log ( 1 ) ; $
+```
+
+Branching (if then else):
+```
+: : if eq ( #x 0 ) then { print ( #x ) ; } else { nop ; } ; $
+```
+
+While loop:
+```
+: : while larger ( #x 0 ) do { #x = sub ( #x 1 ) ; } ; $
+```
+
+Do until loop:
+```
+: : do { nop ; } until eq ( #x 0 ) ; $
+```
+
+### Advanced benchmarks
+
+Recursion and arithmetic (factorial). Tests num function declarations, local variable declarations, recursive calls, and nested arithmetic expressions:
+```
 #result #temp :
 num #fact ( #n ) {
   #res : :
@@ -149,15 +178,10 @@ num #fact ( #n ) {
 #result = #fact ( 5 ) ;
 print ( #result ) ;
 $
-
 ```
-![Factorial Syntax Tree](advanced1.png)
 
-#### 2. Control Flow, Strings & Void Functions
-
-Tests `void` functions, nested loops (`while` and `do-until`), multi-variable conditions (`and`, `or`, `not`), and string output.
-
-```text
+Control flow, strings, and void functions. Tests void functions, nested loops (while and do until), multi variable conditions (and, or, not), and string output:
+```
 #i #j #max #found :
 void #reset ( #v ) {
   : :
@@ -182,15 +206,10 @@ while lesser ( #i #max ) do {
 } ;
 #reset ( #i ) ;
 $
-
 ```
-![Control Flow Syntax Tree](advanced2.png)
 
-#### 3. Nested Scopes & Prefix Expression Trees
-
-Tests function declarations inside local scopes and deeply nested operator trees.
-
-```text
+Nested scopes and prefix expression trees. Tests function declarations inside local scopes and deeply nested operator trees:
+```
 #val :
 num #outer ( ) {
   :
@@ -204,6 +223,26 @@ num #outer ( ) {
 #val = #outer ( ) ;
 print ( add ( sub ( mul ( div ( neg ( 100 ) 2 ) 3 ) 4 ) mod ( 10 3 ) ) ) ;
 $
-
 ```
-![Nested Scopes Syntax Tree](advanced3.png)
+
+Semantic rule tests live in `tests/`:
+
+| File | Tests |
+|---|---|
+| `NESTED.txt` / `SERIALNESTED.txt` | Valid deeply nested and sibling function declarations, 0 errors expected |
+| `MaskTest.txt` | Parameter masked by a local variable |
+| `tests/VariableErrors.txt` | Duplicate declaration, masking, and undeclared variable, combined |
+| `tests/VariableValid.txt` | Valid variable usage across nested scopes |
+| `tests/DirectRecursion.txt` | A function calling itself |
+| `tests/IndirectRecursion.txt` | Two functions calling each other |
+| `tests/SidewaysCall.txt` | Sibling functions attempting to call each other's private sub-functions |
+| `tests/DupFunc.txt` | Two functions with the same name at one level |
+
+
+
+## Status
+
+- [x] Phase 1: Lexer, Parser, Syntax Tree (`tree.xml`)
+- [x] Phase 2a: Scope analysis, Symbol Table, Variable and Function semantic rules
+- [x] Executable build and packaging for Phase 1 submission
+- [ ] Phase 2b / later phases (TBD)
