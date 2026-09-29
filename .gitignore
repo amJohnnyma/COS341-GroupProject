@@ -2,3 +2,6 @@
 __pycache__/
 tree.xml
 syntax_tree.png
+.venv/
+build/*
+
