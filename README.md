@@ -1,6 +1,14 @@
-# COS341 Group Project - SPL Compiler Front-End
+# COS341 Group Project (Group) - SPL Compiler Front-End
 
 A lexical analyzer, LL(1) top-down parser, syntax tree visualizer, and semantic analyzer for the Simple Programming Language (SPL), built for COS341.
+
+## Members
+| Member Name | Student Number | Role |
+| :--- | :--- | :--- |
+| **Member 1 Name** | 12345678 | Speaker |
+| **Dewald Colesky** | 23536030 | Developer |
+| **Member 3 Name** | 34567890 | Developer |
+| **Member 4 Name** | 45678901 | Developer |
 
 ## What this project does
 
@@ -13,33 +21,33 @@ Python 3.10 or newer.
 
 For the optional graph visualizer only, you also need Graphviz.
 
-## Setup
+To create an executable PyInstaller is required
 
-Create and activate a virtual environment:
+### Build the executable
 
-```
-python3 -m venv .venv
-source .venv/bin/activate
-```
+Install PyInstaller:
 
-Install the Python wrapper for Graphviz (only needed if you want the tree image, not needed for parsing itself):
-
-```
-pip install graphviz
+```bash
+pip install pyinstaller
 ```
 
-Graphviz must also be installed on your operating system for the image renderer to work:
+Build a single-file executable from `parser.py`. (PyInstaller does not cross compile, a build made on Linux only runs on Linux, a build made on Windows only runs on Windows):
 
-* Linux (Ubuntu/Debian): `sudo apt install graphviz`
-* macOS: `brew install graphviz`
-* Windows: download from graphviz.org and add it to PATH
+```bash
+pyinstaller --onefile --name group-8 main.py
+```
 
 ## Usage
 
-Run the parser and semantic analyzer on an SPL source file:
-
+Run the executable (program file must be next to executable)
+```bash
+./group-8 <filename>
 ```
-python3 parser.py <filename>
+
+Run the parser and semantic analyzer on an SPL source file (must be next to main.py):
+
+```bash
+python3 main.py <filename>
 ```
 
 On success, this writes `tree.xml` (the syntax tree in the required ID, CONTENTS, CHILDREN, PARENT format).
@@ -52,7 +60,7 @@ On failure, it prints one of:
 
 Generate a visual graph of the tree (optional, requires Graphviz):
 
-```
+```bash
 python3 graph_gen.py
 ```
 
@@ -60,7 +68,7 @@ This converts `tree.xml` into `syntax_tree.png`.
 
 ## Important note about the end of input
 
-The pseudo symbol `$` is NOT literally included at the end of a real test file. `$` is only used to talk about the grammar and the parser, it is not an actual member symbol of the SPL language itself. Our lexer automatically produces an end of file `$` token once it reaches the end of the input, whether or not the file itself contains a literal `$` character. Do not add code that requires a literal `$` at the end of the file, since real grading test files will not have one.
+The pseudo symbol `$` is NOT literally included at the end of a real test file. `$` is only used to talk about the grammar and the parser, it is not an actual member symbol of the SPL language itself. Our lexer automatically produces an end of file `$` token once it reaches the end of the input, whether or not the file itself contains a literal `$` character.
 
 ## Project structure
 
@@ -221,72 +229,11 @@ Semantic rule tests live in `tests/`:
 | `tests/SidewaysCall.txt` | Sibling functions attempting to call each other's private sub-functions |
 | `tests/DupFunc.txt` | Two functions with the same name at one level |
 
-## Building the submission (Phase 1 upload)
 
-Per Announcement #25, the Phase 1 upload requires an executable, a PDF user manual, and both packaged into one ZIP file. Follow these steps.
-
-### Step 1: Build the executable
-
-Install PyInstaller:
-
-```
-pip install pyinstaller
-```
-
-Build a single-file executable from `parser.py`. Run this on the same operating system the tutors will use to test it (PyInstaller does not cross compile, a build made on Linux only runs on Linux, a build made on Windows only runs on Windows):
-
-```
-pyinstaller --onefile --name group-XX parser.py
-```
-
-Replace `XX` with your actual group number. The output executable appears in the `dist/` folder, for example `dist/group-XX.exe` on Windows or `dist/group-XX` on Linux/macOS.
-
-Test the built executable directly before packaging it, using one of the test files above, to confirm it behaves exactly like running `python3 parser.py <file>` did:
-
-```
-dist/group-XX.exe tests/VariableValid.txt
-```
-
-### Step 2: Write the user manual
-
-Create a short PDF named `group-XX.pdf` that explains to the tutors how to run the executable. It must include:
-
-* How to run the program from a command line (exact command, exact argument order)
-* What output to expect on success (tree.xml) and on failure (error message types)
-* The full names and student numbers of every member of the project group
-
-### Step 3: Package into one ZIP file
-
-Place the executable and the PDF into one ZIP file named `group-XX.zip`:
-
-```
-zip group-XX.zip dist/group-XX.exe group-XX.pdf
-```
-
-(On Windows, right click both files and choose "Send to > Compressed (zipped) folder", then rename the result to `group-XX.zip`.)
-
-### Step 4: Upload
-
-Only the group's designated speaker uploads `group-XX.zip` to ClickUp before the deadline. Every other group member makes no upload.
-
-### Submission checklist
-
-- [ ] Executable built and named `group-XX.exe` (or matching platform naming)
-- [ ] Executable tested standalone, not just via `python3 parser.py`
-- [ ] PDF user manual written, named `group-XX.pdf`, includes full names and student numbers of every group member
-- [ ] Both files zipped into one `group-XX.zip`
-- [ ] Only the speaker uploads, before the deadline
-
-### Critical reminders from the announcement
-
-* If the speaker fails to upload before the deadline, the whole group gets 0 points.
-* If the tutors find the exe file not runnable, the whole group gets 0 points. Tutors will not attempt to fix anything.
-* Submissions are tested with 6 black box test cases, 0.5 points each, for a maximum of 3 points on this phase.
-* The pseudo symbol `$` is not literally included at the end of a test file. The lexer must handle end of file correctly on its own, without a literal `$` present.
 
 ## Status
 
 - [x] Phase 1: Lexer, Parser, Syntax Tree (`tree.xml`)
 - [x] Phase 2a: Scope analysis, Symbol Table, Variable and Function semantic rules
-- [ ] Executable build and packaging for Phase 1 submission
+- [x] Executable build and packaging for Phase 1 submission
 - [ ] Phase 2b / later phases (TBD)
