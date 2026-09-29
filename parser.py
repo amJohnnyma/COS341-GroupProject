@@ -2,10 +2,43 @@
 import xml.etree.ElementTree as ET
 from lexer import Lexer
 from tokens import Token, TOKEN_TAG_MAP
-from tree_crawl import TreeCrawl
-from symbol_table import SymbolTable
-from semantic_check import run_all_checks
 
+
+
+def write_tree_xml(root: Node, filename: str = "tree.xml"):
+
+    tree_el = ET.Element("TREE")
+
+
+    for node in root.all_nodes():
+      
+        node_el = ET.SubElement(tree_el, "NODE")
+
+        id_el = ET.SubElement(node_el, "ID")
+        id_el.text = str(node.id)
+
+        contents_el = ET.SubElement(node_el, "CONTENTS")
+        contents_el.text = node.contents
+
+
+        if node.children:
+           
+            children_el = ET.SubElement(node_el, "CHILDREN")
+            children_el.text = ",".join(str(c.id) for c in node.children)
+
+
+        if node.parent is not None:
+           
+            parent_el = ET.SubElement(node_el, "PARENT")
+            parent_el.text = str(node.parent.id)
+
+    ET.indent(tree_el, space="  ")
+    xml_str = ET.tostring(tree_el, encoding="unicode")
+   
+    with open(filename, "w", encoding="utf-8") as f:
+        
+        f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+        f.write(xml_str)
 
 
 class ParseError(Exception):
@@ -47,41 +80,6 @@ class Node:
             yield from c.all_nodes()
 
 
-
-def write_tree_xml(root: Node, filename: str = "tree.xml"):
-
-    tree_el = ET.Element("TREE")
-
-
-    for node in root.all_nodes():
-      
-        node_el = ET.SubElement(tree_el, "NODE")
-
-        id_el = ET.SubElement(node_el, "ID")
-        id_el.text = str(node.id)
-
-        contents_el = ET.SubElement(node_el, "CONTENTS")
-        contents_el.text = node.contents
-
-
-        if node.children:
-           
-            children_el = ET.SubElement(node_el, "CHILDREN")
-            children_el.text = ",".join(str(c.id) for c in node.children)
-
-
-        if node.parent is not None:
-           
-            parent_el = ET.SubElement(node_el, "PARENT")
-            parent_el.text = str(node.parent.id)
-
-    ET.indent(tree_el, space="  ")
-    xml_str = ET.tostring(tree_el, encoding="unicode")
-   
-    with open(filename, "w", encoding="utf-8") as f:
-        
-        f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
-        f.write(xml_str)
 
 
 
@@ -498,50 +496,3 @@ class Parser:
 
 
 
-if __name__ == "__main__":
-    
-    import sys
-
-    
-    if len(sys.argv) < 2:
-     
-        print("Usage: python parser.py <SPL-source-file>")
-        sys.exit(1)
-
-    
-    with open(sys.argv[1], "r", encoding="utf-8") as f:
-      
-        source = f.read()
-
-    
-    lexer = Lexer(source)
-    parser = Parser(lexer)
-
-    
-    try:
-    
-        root = parser.parse()
-        write_tree_xml(root, "tree.xml")
-        print("Parse successful. Wrote tree.xml")
-        crawler = TreeCrawl("tree.xml")
-        crawler.print_tree()
-        crawler.print_all_scopes()
-        symbol_table = SymbolTable(crawler)
-
-        errors = run_all_checks(crawler, symbol_table)
-        if errors: 
-            for error in errors:
-                print(error)
-            sys.exit(1)
-
-        symbol_table.print_table()
-    
-    except ParseError as e:
-      
-        print(f"SYNTAX ERROR: {e}")
-        sys.exit(1)
-    
-    except Exception as e:
-      
-        print(f"LEXICAL ERROR: {e}")
-        sys.exit(1)

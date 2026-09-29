@@ -55,6 +55,18 @@ python3 graph_gen.py
 
 ---
 
+## Build
+
+### 1. Install pyinstaller
+```bash
+pip install pyinstaller
+```
+
+### 2. Create executable
+```bash
+pyinstaller --onefile --name group-8 main.py
+```
+
 ## Test Cases
 
 ### Basic Statements

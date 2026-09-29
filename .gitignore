@@ -2,3 +2,4 @@
 __pycache__/
 tree.xml
 .venv/
+build/*
