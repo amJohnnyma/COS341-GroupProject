@@ -5,7 +5,7 @@ A lexical analyzer, LL(1) top-down parser, syntax tree visualizer, and semantic 
 ## Members
 | Member Name | Student Number | Role |
 | :--- | :--- | :--- |
-| **Member 1 Name** | 12345678 | Speaker |
+| **Christopher Adolph** | 23535548 | Speaker |
 | **Dewald Colesky** | 23536030 | Developer |
 | **Heinrich Romer** | 23538181 | Developer |
 | **Member 4 Name** | 45678901 | Developer |
