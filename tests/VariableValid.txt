@@ -1,0 +1,24 @@
+#x #global
+:
+void #f ( #p ) {
+    #x
+    :
+    void #g ( ) {
+        :
+        :
+        print ( #x ) ;
+        print ( #p ) ;
+        print ( #global ) ;
+        return
+    }
+    :
+    #x = #p ;
+    #g ( ) ;
+    return
+}
+:
+#x = 1 ;
+#global = 2 ;
+#f ( #x ) ;
+print ( #x ) ;
+$

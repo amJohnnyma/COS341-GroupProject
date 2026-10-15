@@ -1,0 +1,12 @@
+#x #x
+:
+void #f ( #p ) {
+    #p
+    :
+    :
+    print ( #missing ) ;
+    return
+}
+:
+#f ( 1 ) ;
+$
