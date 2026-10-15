@@ -3,6 +3,7 @@ from lexer import Lexer
 from symbol_table import SymbolTable
 from tree_crawl import TreeCrawl
 from semantic_check import run_all_checks
+from type_analyser import TypeAnalyser
 
 if __name__ == "__main__":
     import sys
@@ -32,12 +33,15 @@ if __name__ == "__main__":
         crawler.print_tree()
         crawler.print_all_scopes()
         symbol_table = SymbolTable(crawler)
+        type_analyser = TypeAnalyser(symbol_table)
 
         errors = run_all_checks(crawler, symbol_table)
         if errors: 
             for error in errors:
                 print(error)
             sys.exit(1)
+
+        type_analyser.perform_type_checking()
 
         symbol_table.print_table()
     

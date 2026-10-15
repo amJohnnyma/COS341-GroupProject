@@ -2,6 +2,16 @@ from typing import Optional
 from tree_crawl import TreeCrawl, ScopeLevel, SLNode
 
 
+from enum import Enum
+
+class Type(Enum):
+    OK = 1
+    NUMERIC = 2
+    PROCEDURE = 3
+    UNKNOWN = 4
+    FLOAT_NUMERIC = 5
+    BOOLEAN = 6
+
 class SymbolEntry:
     def __init__(self, original_name, internal_name, scope, decl_node_id, kind):
         self.original_name = original_name
@@ -12,11 +22,16 @@ class SymbolEntry:
         # node id of the name in tree.xml  
         self.decl_node_id = decl_node_id 
         self.kind = kind 
+        self.type : Type = Type.UNKNOWN
+
+    def setType(self, type : Type):
+        self.type = type
 
     def __repr__(self):
         return (f"SymbolEntry({self.original_name} -> {self.internal_name}, "
                 f"kind={self.kind}, scope_id={self.scope.scope_id}, "
-                f"level={self.scope.level}, node={self.decl_node_id})")
+                f"level={self.scope.level}, node={self.decl_node_id}, "
+                f"type={self.type})")
 
 
 class SymbolTable:
@@ -80,18 +95,19 @@ class SymbolTable:
         
     def print_table(self):
         print()
-        print("=" * 72)
+        print("=" * 92)
         print("SYMBOL TABLE")
-        print("=" * 72)
-        print(f"{'ORIGINAL':<16}{'INTERNAL':<10}{'KIND':<10}{'SCOPE_ID':<10}{'LEVEL':<8}{'DECL_NODE':<10}")
-        print("-" * 72)
+        print("=" * 92)
+        print(f"{'ORIGINAL':<16}{'INTERNAL':<10}{'KIND':<10}{'SCOPE_ID':<10}{'LEVEL':<8}{'DECL_NODE':<14}{'TYPE':<20}")
+        print("-" * 92)
         for e in self.entries:
             print(f"{e.original_name:<16}{e.internal_name:<10}{e.kind:<10}"
-                  f"{e.scope.scope_id:<10}{e.scope.level:<8}{e.decl_node_id:<10}")
+                  f"{e.scope.scope_id:<10}{e.scope.level:<8}{e.decl_node_id:<14}"
+                  f"{e.type:<20}")
 
         print()
         print("PER SCOPE")
-        print("-" * 72)
+        print("-" * 92)
         for scope in self.crawler.get_all_scopes():
             parent = scope.parent.scope_id if scope.parent else None
             print(f"Scope {scope.scope_id} (level {scope.level}, parent {parent})")
@@ -102,6 +118,6 @@ class SymbolTable:
 
         print()
         print("LOOKUP (decl_node_id -> internal_name)")
-        print("-" * 72)
+        print("-" * 92)
         for node_id, internal in self.lookup.items():
             print(f"    {node_id:<6} -> {internal}")
