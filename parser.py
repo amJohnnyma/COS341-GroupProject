@@ -1,4 +1,4 @@
-
+from __future__ import annotations
 import xml.etree.ElementTree as ET
 from lexer import Lexer
 from tokens import Token, TOKEN_TAG_MAP
