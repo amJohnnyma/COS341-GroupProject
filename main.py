@@ -3,7 +3,7 @@ from lexer import Lexer
 from symbol_table import SymbolTable
 from tree_crawl import TreeCrawl
 from semantic_check import run_all_checks
-from type_analyser import TypeAnalyser
+from type_analyser import TypeAnalyser, TypeAnalysisError
 
 
 if __name__ == "__main__":
@@ -52,8 +52,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
 
-    except TypeError as e:
-        print(f"TYPE ERROR: {e}")
+    except TypeAnalysisError as e:
+        print(e)
         sys.exit(1)
 
 
