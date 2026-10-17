@@ -1,0 +1,1 @@
+: num #f ( ) { : void #p ( ) { : : nop ; return } : return ( #p ( ) ) } : print ( #f ( ) ) ;
