@@ -1,0 +1,1 @@
+: void #p ( ) { : : nop ; return } : if eq ( #p ( ) 1 ) then { nop ; } else { nop ; } ;

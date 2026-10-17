@@ -4,6 +4,10 @@ from tree_crawl import SLNode
 from typing import Optional
 
 
+class TypeAnalysisError(Exception):
+    pass
+
+
 
 class TypeAnalyser:
     def __init__(self, st : SymbolTable):
@@ -18,19 +22,23 @@ class TypeAnalyser:
         result = self._check_SPL_PROG(root_id)
         print(f"--- Type Check Ended: {result} ---")
         if result != Type.OK:
-            raise TypeError(f"Type analysis failed at SPL_PROG (node {root_id})")
+            raise TypeAnalysisError(f"TYPE ERROR: type analysis failed at SPL_PROG (node {root_id})")
 
 
     def _check_mod_div_rule(self):
-        has_mod = False
-        has_div = False
-        for node in self.crawler.nodes.values():
-            if node.contents == "mod":
-                has_mod = True
-            elif node.contents == "div":
-                has_div = True
+        nodes = self.crawler.nodes.values()
+        has_mod = any(n.contents == "mod" for n in nodes)
+        has_div = any(n.contents == "div" for n in nodes)
         if has_mod and has_div:
-            raise TypeError("A float-integer-conflict might perhaps be possible")
+            raise TypeAnalysisError("A float-integer-conflict might perhaps be possible")
+        if has_mod:
+            for n in nodes:
+                if n.children_ids or n.parent is None or n.parent.contents != "TERM":
+                    continue
+                if len(n.parent.children_ids) == 1 and "." in n.contents:
+                    raise TypeAnalysisError(
+                        f"TYPE ERROR: decimal number {n.contents} (node {n.id}) "
+                        f"is not allowed because the program uses mod")
 
 
     def _check_SPL_PROG(self, node_id : int):

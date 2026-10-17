@@ -1,0 +1,4 @@
+#x : :
+#x = 3 ;
+if larger ( #x 1 ) then { nop ; } else { nop ; } ;
+while not ( and ( eq ( #x 0 ) lesser ( #x 5 ) ) ) do { #x = sub ( #x 1 ) ; } ;
