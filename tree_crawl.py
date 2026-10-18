@@ -1,6 +1,8 @@
 import xml.etree.ElementTree as ET
 from typing import Optional, List, Dict
 
+
+
 class ScopeLevel:
     def __init__(self, scope_id = 0, level = 0, parent = None):
         self.scope_id = scope_id
@@ -23,6 +25,8 @@ class SLNode:
     def __repr__(self):
         return f"Node(ID={self.id}, Contents='{self.contents}', Scope={self.scope_level})"
 
+
+
 class TreeCrawl:
     def __init__(self, filename):
         self.nodes = {}
@@ -35,6 +39,7 @@ class TreeCrawl:
 
     def getNode(self, node_id:int) -> Optional[SLNode]:
         return self.nodes.get(node_id)
+
 
     def _get_next_scope_id(self) -> int:
         sid = self._next_scope_id
