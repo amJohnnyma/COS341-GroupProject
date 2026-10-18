@@ -115,18 +115,29 @@ class TypeAnalyser:
         node : Optional[SLNode] = self.crawler.getNode(node_id)
         if node is None:
             return Type.UNKNOWN
-        results = []
+        keyword = self.crawler.getNode(node.children_ids[0])
+        name_id = node.children_ids[1]
+        entry = self.symbol_table.get_entry(name_id)
+        if keyword is None or entry is None:
+            return Type.UNKNOWN
+        # void -> procedure, num -> numeric
+        entry.setType(Type.PROCEDURE if keyword.contents == "void" else Type.NUMERIC)
         for child_id in node.children_ids:
             child = self.crawler.getNode(child_id)
             if child is None:
                 continue
-            if child.contents == "V_DECL":
-                results.append(self._check_V_DECL(child_id))
-            elif child.contents == "P":
-                results.append(self._check_P(child_id))
-            elif child.contents == "TERM":
-                results.append(self._check_TERM(child_id))
-        return Type.OK if all(r == Type.OK for r in results) else Type.UNKNOWN
+            if child.contents == "V_DECL" and self._check_V_DECL(child_id) != Type.OK:
+                raise TypeAnalysisError(
+                    f"TYPE ERROR: parameters of function {entry.original_name} (node {child_id}) are not ok")
+            elif child.contents == "P" and self._check_P(child_id) != Type.OK:
+                raise TypeAnalysisError(
+                    f"TYPE ERROR: body of function {entry.original_name} (node {child_id}) is not ok")
+            elif child.contents == "TERM" and self._check_TERM(child_id) != Type.NUMERIC:
+                raise TypeAnalysisError(
+                    f"TYPE ERROR: return value of num function {entry.original_name} "
+                    f"(node {child_id}) is not numeric")
+        return Type.OK
+
 
 
     def _check_ALGO(self, node_id : int):
@@ -157,7 +168,6 @@ class TypeAnalyser:
         return Type.OK if all(r == Type.OK for r in results) else Type.UNKNOWN
 
 
-
     def _check_INSTR(self, node_id : int):
         node : Optional[SLNode] = self.crawler.getNode(node_id)
         if node is None:
@@ -176,7 +186,6 @@ class TypeAnalyser:
             elif child.contents == "LOOP":
                 results.append(self._check_LOOP(child_id))
         return Type.OK if all(r == Type.OK for r in results) else Type.UNKNOWN
-
 
 
     def _check_INPUT(self, node_id : int):
@@ -198,18 +207,40 @@ class TypeAnalyser:
 
     def _check_INSTRTAIL(self, node_id : int):
         node : Optional[SLNode] = self.crawler.getNode(node_id)
-        if node is None:
+        if node is None or node.parent is None:
             return Type.UNKNOWN
-        results = []
-        for child_id in node.children_ids:
-            child = self.crawler.getNode(child_id)
-            if child is None:
-                continue
-            if child.contents == "INPUT":
-                results.append(self._check_INPUT(child_id))
-            elif child.contents == "TERM":
-                results.append(self._check_TERM(child_id))
-        return Type.OK if all(r == Type.OK for r in results) else Type.UNKNOWN
+        # INSTR -> NAME INSTRTAIL
+        name_id = node.parent.children_ids[0]
+        first = self.crawler.getNode(node.children_ids[0])
+        if first is not None and first.contents == "=":
+            return self._check_ASSIGN(name_id, node.children_ids[1])
+        return self._check_CALL(name_id, node.children_ids[1])
+
+
+    def _check_ASSIGN(self, name_id : int, term_id : int):
+        # INSTR -> NAME = TERM
+        name = self.crawler.getNode(name_id)
+        if self.symbol_table.name_type(name_id) != Type.NUMERIC:
+            raise TypeAnalysisError(
+                f"TYPE ERROR: assignment target {name.contents} (node {name_id}) is not numeric")
+        if self._check_TERM(term_id) != Type.NUMERIC:
+            raise TypeAnalysisError(
+                f"TYPE ERROR: value assigned to {name.contents} (node {term_id}) is not numeric")
+        return Type.OK
+
+
+    def _check_CALL(self, name_id : int, input_id : int):
+        # INSTR -> NAME ( INPUT )
+        name = self.crawler.getNode(name_id)
+        if self.symbol_table.call_type(name_id) != Type.PROCEDURE:
+            raise TypeAnalysisError(
+                f"TYPE ERROR: {name.contents} (node {name_id}) is called as an instruction "
+                f"but is not a void procedure")
+        if self._check_INPUT(input_id) != Type.OK:
+            raise TypeAnalysisError(
+                f"TYPE ERROR: arguments of call to {name.contents} (node {input_id}) are not ok")
+        return Type.OK
+
 
 
 

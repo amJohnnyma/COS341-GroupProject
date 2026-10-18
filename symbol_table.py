@@ -92,6 +92,23 @@ class SymbolTable:
 
     def get_internal_name(self, decl_node_id: int) -> Optional[str]:
         return self.lookup.get(decl_node_id)
+
+    def get_entry(self, node_id: int) -> Optional[SymbolEntry]:
+        internal_name = self.lookup.get(node_id)
+        if internal_name is None:
+            return None
+        return next((e for e in self.entries if e.internal_name == internal_name), None)
+
+    def name_type(self, node_id: int) -> Type:
+        entry = self.get_entry(node_id)
+        return entry.type if entry is not None else Type.UNKNOWN
+
+    def call_type(self, node_id: int) -> Type:
+        node = self.crawler.getNode(node_id)
+        if node is None or node.scope_level is None:
+            return Type.UNKNOWN
+        entries = node.scope_level.functions.get(node.contents)
+        return entries[-1].type if entries else Type.UNKNOWN
         
     def print_table(self):
         print()
