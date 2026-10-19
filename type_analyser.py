@@ -175,36 +175,55 @@ class TypeAnalyser:
 
 
 
-    def _check_BOOL(self, node_id : int):
-        node : Optional[SLNode] = self.crawler.getNode(node_id)
-        if node is None:
-            return Type.UNKNOWN
-            
-        children = [self.crawler.getNode(cid) for cid in node.children_ids if self.crawler.getNode(cid)]
-        if not children:
-            return Type.BOOLEAN
+    def _check_BOOL(self, node_id: int):
+        node = self.crawler.getNode(node_id)
+
+        if node is None or node.contents != "BOOL" or not node.children_ids:
+            raise TypeAnalysisError(f"TYPE ERROR: expected BOOL at node {node_id}")
+
+        children = [
+            self.crawler.getNode(cid)
+            for cid in node.children_ids
+        ]
+
+        if any(child is None for child in children):
+            raise TypeAnalysisError(f"TYPE ERROR: incomplete BOOL at node {node_id}")
 
         op = children[0].contents
-        
-        if op == "not":
-            if self._check_BOOL(children[1].id) != Type.BOOLEAN:
-                raise TypeAnalysisError(f"TYPE ERROR: 'not' requires a boolean (node {node_id})")
-            return Type.BOOLEAN
-            
-        elif op in ("and", "or"):
-            if self._check_BOOL(children[1].id) != Type.BOOLEAN or self._check_BOOL(children[2].id) != Type.BOOLEAN:
-                raise TypeAnalysisError(f"TYPE ERROR: '{op}' requires booleans (node {node_id})")
-            return Type.BOOLEAN
-            
-        elif op in ("eq", "larger", "lesser"):
-            if self._check_TERM(children[1].id) != Type.NUMERIC or self._check_TERM(children[2].id) != Type.NUMERIC:
-                raise TypeAnalysisError(f"TYPE ERROR: '{op}' requires numeric terms (node {node_id})")
-            return Type.BOOLEAN
-            
-        return Type.UNKNOWN
 
+        if op in ("not", "and", "or"):
+            operands = [
+                child for child in children
+                if child.contents == "BOOL"
+            ]
 
+            expected = 1 if op == "not" else 2
 
+            if len(operands) != expected:
+                raise TypeAnalysisError(f"TYPE ERROR: {op} requires {expected} boolean operand(s) at node {node_id}")
+
+            for operand in operands:
+                if self._check_BOOL(operand.id) != Type.BOOLEAN:
+                    raise TypeAnalysisError(f"TYPE ERROR: {op} requires boolean operands at node {node_id}")
+
+            return Type.BOOLEAN
+
+        if op in ("eq", "larger", "lesser"):
+            operands = [
+                child for child in children
+                if child.contents == "TERM"
+            ]
+
+            if len(operands) != 2:
+                raise TypeAnalysisError(f"TYPE ERROR: {op} requires two numeric terms at node {node_id}")
+
+            for operand in operands:
+                if self._check_TERM(operand.id) != Type.NUMERIC:
+                    raise TypeAnalysisError(f"TYPE ERROR: {op} requires numeric terms at node {node_id}")
+
+            return Type.BOOLEAN
+
+        raise TypeAnalysisError(f"TYPE ERROR: invalid BOOL at node {node_id}")
 
 
     def _check_BRANCH(self, node_id : int):
@@ -307,40 +326,51 @@ class TypeAnalyser:
 
 
 
-    def _check_OUTP(self, node_id : int):
-        node : Optional[SLNode] = self.crawler.getNode(node_id)
-        if node is None:
-            return Type.UNKNOWN
-        for child_id in node.children_ids:
-            child = self.crawler.getNode(child_id)
-            if child is not None and child.contents == "TERM":
-                if self._check_TERM(child_id) != Type.NUMERIC:
-                    return Type.UNKNOWN
-        return Type.OK
+    def _check_OUTP(self, node_id: int):
+        node = self.crawler.getNode(node_id)
+
+        if node is None or node.contents != "OUTP" or not node.children_ids:
+            raise TypeAnalysisError(f"TYPE ERROR: expected OUTP at node {node_id}")
+
+        first = self.crawler.getNode(node.children_ids[0])
+
+        if first is None:
+            raise TypeAnalysisError(f"TYPE ERROR: incomplete OUTP at node {node_id}")
+
+        if len(node.children_ids) == 1 and first.contents.startswith('"'):
+            return Type.OK
+
+        if first.contents == "(" and len(node.children_ids) == 3:
+            if self._check_TERM(node.children_ids[1]) == Type.NUMERIC:
+                return Type.OK
+
+        raise TypeAnalysisError(f"TYPE ERROR: invalid output at node {node_id}")
 
 
 
 
+    def _check_INPUT(self, node_id: int):
+        node = self.crawler.getNode(node_id)
 
+        if node is None or node.contents != "INPUT" or not node.children_ids:
+            raise TypeAnalysisError(f"TYPE ERROR: expected INPUT at node {node_id}")
 
-    def _check_INPUT(self, node_id : int):
-        node : Optional[SLNode] = self.crawler.getNode(node_id)
-        if node is None:
-            return Type.UNKNOWN
-        for child_id in node.children_ids:
-            child = self.crawler.getNode(child_id)
-            if child is None:
-                continue
-            if child.contents == "TERM":
-                if self._check_TERM(child_id) != Type.NUMERIC:
-                    return Type.UNKNOWN
-            elif child.contents == "INPUT":
-                if self._check_INPUT(child_id) != Type.OK:
-                    return Type.UNKNOWN
-        return Type.OK
+        first = self.crawler.getNode(node.children_ids[0])
 
+        if first is None:
+            raise TypeAnalysisError(f"TYPE ERROR: incomplete INPUT at node {node_id}")
 
+        if first.contents == "epsilon" and len(node.children_ids) == 1:
+            return Type.OK
 
+        if first.contents == "TERM" and len(node.children_ids) == 2:
+            if self._check_TERM(first.id) != Type.NUMERIC:
+                raise TypeAnalysisError(f"TYPE ERROR: argument at node {first.id} is not numeric")
+
+            if self._check_INPUT(node.children_ids[1]) == Type.OK:
+                return Type.OK
+
+        raise TypeAnalysisError(f"TYPE ERROR: invalid INPUT at node {node_id}")
 
 
     def _check_INSTRTAIL(self, node_id : int):
@@ -387,62 +417,79 @@ class TypeAnalyser:
 
 
 
+    def _check_TERM(self, node_id: int):
+        node = self.crawler.getNode(node_id)
+        if node is None or node.contents != "TERM" or not node.children_ids:
+            raise TypeAnalysisError(f"TYPE ERROR: expected TERM at node {node_id}")
 
+        children = [
+            self.crawler.getNode(cid)
+            for cid in node.children_ids
+        ]
 
-    def _check_TERM(self, node_id : int):
-        node : Optional[SLNode] = self.crawler.getNode(node_id)
-        if node is None:
-            return Type.UNKNOWN
-            
-        for child_id in node.children_ids:
-            child = self.crawler.getNode(child_id)
-            if child is None:
-                continue
-            if child.contents == "TERMTAIL":
-                if self._check_TERMTAIL(child_id) != Type.NUMERIC:
-                    return Type.UNKNOWN
-            elif child.contents == "TERM":
-                if self._check_TERM(child_id) != Type.NUMERIC:
-                    return Type.UNKNOWN
-            elif child.contents == "CALL":
-                # TERM -> CALL (like #f() )
-                name_id = child.children_ids[0]
-                if self._get_func_type(name_id) != Type.NUMERIC:
-                    raise TypeAnalysisError(f"TYPE ERROR: call to void function used as term (node {node_id})")
-        return Type.NUMERIC
+        if any(child is None for child in children):
+            raise TypeAnalysisError(f"TYPE ERROR: incomplete TERM at node {node_id}")
 
+        first = children[0]
 
+        if first.contents.startswith("#"):
+            if len(children) == 2 and children[1].contents == "TERMTAIL":
+                return self._check_TERMTAIL(children[1].id)
 
-
-    def _check_TERMTAIL(self, node_id : int):
-        node : Optional[SLNode] = self.crawler.getNode(node_id)
-        if node is None or node.parent is None:
-            return Type.UNKNOWN
-            
-
-       
-        name_id = node.parent.children_ids[0]
-        name_node = self.crawler.getNode(name_id)
-        
-        has_input = False
-        for child_id in node.children_ids:
-            child = self.crawler.getNode(child_id)
-            if child is not None and child.contents == "INPUT":
-                has_input = True
-                if self._check_INPUT(child_id) != Type.OK:
-                    return Type.UNKNOWN
-
-
-
-
-        if not has_input:
+        elif len(children) == 1:
             return Type.NUMERIC
-            
-        if self._get_func_type(name_id) != Type.NUMERIC:
-            raise TypeAnalysisError(
-                f"TYPE ERROR: {name_node.contents} (node {name_id}) is called in an expression "
-                f"but does not return a numeric value")
+
+        elif first.contents in ("mod", "div", "add", "sub", "mul", "neg"):
+            operands = [
+                child for child in children
+                if child.contents == "TERM"
+            ]
+
+            expected = 1 if first.contents == "neg" else 2
+
+            if len(operands) != expected:
+                raise TypeAnalysisError(f"TYPE ERROR: {first.contents} needs {expected} operand(s) at node {node_id}")
+
+            for operand in operands:
+                if self._check_TERM(operand.id) != Type.NUMERIC:
+                    raise TypeAnalysisError(f"TYPE ERROR: non-numeric operand of {first.contents} at node {operand.id}")
+
+            return Type.NUMERIC
+
+        raise TypeAnalysisError(f"TYPE ERROR: invalid TERM at node {node_id}")
 
 
-                
+
+
+    def _check_TERMTAIL(self, node_id: int):
+        node = self.crawler.getNode(node_id)
+
+        if (node is None or node.contents != "TERMTAIL" or node.parent is None or node.parent.contents != "TERM" or not node.children_ids):
+            raise TypeAnalysisError(f"TYPE ERROR: expected TERMTAIL at node {node_id}")
+
+        name_id = node.parent.children_ids[0]
+        name = self.crawler.getNode(name_id)
+        first = self.crawler.getNode(node.children_ids[0])
+
+        if name is None or first is None:
+            raise TypeAnalysisError(f"TYPE ERROR: incomplete TERMTAIL at node {node_id}")
+
+        if first.contents == "epsilon":
+            result = self.symbol_table.name_type(name_id)
+
+        elif first.contents == "(" and len(node.children_ids) == 3:
+            result = self._get_func_type(name_id)
+
+            if result != Type.NUMERIC:
+                raise TypeAnalysisError(f"TYPE ERROR: {name.contents} at node {name_id} does not return a numeric value")
+
+            if self._check_INPUT(node.children_ids[1]) != Type.OK:
+                raise TypeAnalysisError(f"TYPE ERROR: invalid arguments for {name.contents}")
+
+        else:
+            raise TypeAnalysisError(f"TYPE ERROR: invalid TERMTAIL at node {node_id}")
+
+        if result != Type.NUMERIC:
+            raise TypeAnalysisError(f"TYPE ERROR: variable {name.contents} at node {name_id} is not numeric")
+
         return Type.NUMERIC
