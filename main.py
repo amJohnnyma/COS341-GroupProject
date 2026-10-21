@@ -1,9 +1,10 @@
 from parser import Parser, ParseError, write_tree_xml
 from lexer import Lexer
-from symbol_table import SymbolTable
+from symbol_table import SymbolTable, Type
 from tree_crawl import TreeCrawl
 from semantic_check import run_all_checks
 from type_analyser import TypeAnalyser, TypeAnalysisError
+from code_generator import CodeGenerator
 
 
 if __name__ == "__main__":
@@ -46,6 +47,24 @@ if __name__ == "__main__":
 
         symbol_table.print_table()
 
+        
+        print("--- Code Generation Started ---")
+        
+        
+        program_type = Type.NUMERIC 
+        
+        codegen = CodeGenerator(symbol_table, program_type)
+        root_id = next(nid for nid, node in crawler.nodes.items() if node.parent is None)
+        
+        codegen.trans_SPL_PROG(root_id)
+        
+        with open("output.c", "w") as f:
+            for line in codegen.output:
+                f.write(line + "\n")
+                
+        print("--- Code Generation Successful: Wrote output.c ---")
+       
+
 
     except ParseError as e:
         print(f"SYNTAX ERROR: {e}")
@@ -59,7 +78,4 @@ if __name__ == "__main__":
 
     except Exception as e:
         print(f"LEXICAL ERROR: {e}")
-
         sys.exit(1)
-
-
