@@ -1,0 +1,1 @@
+#count : : #count = 3 ; do { print ( #count ) ; #count = sub ( #count 1 ) ; } until eq ( #count 0 ) ; $
