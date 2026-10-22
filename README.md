@@ -10,6 +10,20 @@ A lexical analyzer, LL(1) top-down parser, syntax tree visualizer, semantic anal
 | **Heinrich Romer** | 23538181 | Developer |
 | **Jonty Honey** | 23536862 | Developer |
 
+## Declarations
+
+### 1st Written Declaration
+**Christopher Adolph**->
+**Dewald Colesky**->
+**Heinrich Romer**->
+**Jonty Honey**->
+
+### 2nd Written Declaration
+**Christopher Adolph**->
+**Dewald Colesky**->
+**Heinrich Romer**->
+**Jonty Honey**->
+
 
 ## What this project does
 
@@ -37,7 +51,7 @@ pip install pyinstaller
 
 ```
 
-Build a single-file executable from `parser.py` (or `main.py`):
+Build a single-file executable from `main.py`:
 
 ```bash
 pyinstaller --onefile --name group-8 main.py
