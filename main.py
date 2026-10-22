@@ -5,6 +5,7 @@ from tree_crawl import TreeCrawl
 from semantic_check import run_all_checks
 from type_analyser import TypeAnalyser, TypeAnalysisError
 from code_generator import CodeGenerator
+from pathlib import Path
 
 
 if __name__ == "__main__":
@@ -57,12 +58,16 @@ if __name__ == "__main__":
         root_id = next(nid for nid, node in crawler.nodes.items() if node.parent is None)
         
         codegen.trans_SPL_PROG(root_id)
+
+        filename = Path(sys.argv[1]).stem
         
-        with open("output.c", "w") as f:
+        with open(filename + ".c", "w") as f:
             for line in codegen.output:
                 f.write(line + "\n")
                 
-        print("--- Code Generation Successful: Wrote output.c ---")
+        print("--- Code Generation Successful: Wrote output in C ---")
+        print(f"--- Build with: gcc {filename}.c -o {filename}")
+        print(f"--- Run with: ./{filename}")
        
 
 

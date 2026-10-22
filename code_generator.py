@@ -62,7 +62,7 @@ class CodeGenerator:
 
 
         self.trans_P(p_node.id, is_mine=True)
-        self.emit("#include <iostream>")
+        self.emit("#include <stdio.h>")
         self.emit("int main() {")
         self.trans_P(p_node.id, is_mine=False)
         self.emit("return 0;")
@@ -351,13 +351,19 @@ class CodeGenerator:
         
  
         if first.contents.startswith('"'):
-            self.emit(f"std::cout << {first.contents};")
+            self.emit(f'printf("%s", {first.contents});')
  
         elif first.contents == "(":
             t = self.new_var()
             self.emit(f"{self.typ} {t};")
-            self.trans_TERM(node.children_ids[1], t)
-            self.emit(f"std::cout << {t};")
+            term_node_id = next((cid for cid in node.children_ids if self.crawler.getNode(cid).contents == "TERM"), None)
+            if term_node_id is None and len(node.children_ids) > 1:
+                term_node_id = node.children_ids[1] # fallback index
+                
+            self.trans_TERM(term_node_id, t)
+            
+            fmt = "%f" if self.typ == Type.FLOAT_NUMERIC else "%d"
+            self.emit(f'printf("{fmt}\\n", {t});')
 
 
 

@@ -1,0 +1,1 @@
+#res : num #square ( #x ) { : : return ( mul ( #x #x ) ) } : #res = #square ( 6 ) ; print ( #res ) ; $
