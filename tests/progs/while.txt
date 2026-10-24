@@ -1,0 +1,1 @@
+#x : : #x = 5 ; while larger ( #x 0 ) do { if eq ( #x 3 ) then { print ( #x ) ; } else { nop ; } ; #x = sub ( #x 1 ) ; } ; $
