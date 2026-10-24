@@ -14,6 +14,9 @@ from pathlib import Path
 if __name__ == "__main__":
     import sys
 
+    # Windows consoles/pipes default to cp1252, which can't print the tree's box-drawing characters
+    sys.stdout.reconfigure(encoding="utf-8")
+
     if len(sys.argv) < 2:
         print("Usage: python main.py <SPL-source-file>")
         sys.exit(1)
@@ -68,7 +71,7 @@ if __name__ == "__main__":
 
         filename = Path(sys.argv[1]).stem
         
-        with open(filename + ".c", "w") as f:
+        with open(filename + ".c", "w", encoding="utf-8") as f:
             for line in codegen.output:
                 f.write(line + "\n")
 
